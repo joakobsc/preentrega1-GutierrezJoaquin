@@ -28,11 +28,12 @@ export default class ProductManager {
   getProductById(id) {
     return this.products.find((product) => product.id === id);
   }
-  addProduct() {
+  addProduct(product) {
     const newProduct = {
       id: this.products.length
         ? this.products[this.products.length - 1].id + 1
         : 1,
+      ...product,
       status: true,
     };
     this.products.push(newProduct);

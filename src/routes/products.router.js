@@ -40,31 +40,21 @@ router.get("/:pid", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const { id, title, description, code, price, status, stock, category } =
+    const { title, description, code, price, stock, category, thumbnail } =
       req.body;
-    if (
-      !id ||
-      !title ||
-      !description ||
-      !code ||
-      !price ||
-      !status ||
-      !stock ||
-      !category
-    ) {
+    if (!title || !description || !code || !price || !stock || !category) {
       return res
         .status(400)
         .json({ error: "Todos los campos son obligatorios" });
     }
     const product = await productsManager.addProduct({
-      id,
       title,
       description,
       code,
       price,
-      status,
       stock,
       category,
+      thumbnail,
     });
     res.status(201).json(product);
   } catch (error) {
