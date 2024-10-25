@@ -1,5 +1,40 @@
 const socket = io();
 
+// Solicitar la contraseña al cargar la página
+function requestPassword() {
+  Swal.fire({
+    icon: "warning",
+    title: "Acceso restringido",
+    text: "Ingrese la contraseña para modificar los productos en tiempo real (contraseña= 'admin').",
+    input: "password",
+    inputPlaceholder: "Contraseña",
+    allowOutsideClick: false,
+    inputValidator: (value) => {
+      if (!value) {
+        return "Por favor, ingrese una contraseña.";
+      } else if (value !== "admin") {
+        return "Contraseña incorrecta. Intente nuevamente.";
+      } else {
+        // Si la contraseña es correcta, puedes permitir el acceso
+        return null; // No hay error
+      }
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Aquí puedes cargar la lista de productos o cualquier otra acción
+      const welcomeMessage = document.getElementById("welcome-message");
+      welcomeMessage.innerHTML = `<h2>¡Bienvenido a Real Time Products!</h2>`;
+      // Aquí puedes agregar cualquier otra lógica que necesites para cargar productos
+    } else {
+      // Si se cancela, volver a solicitar la contraseña
+      requestPassword();
+    }
+  });
+}
+
+// Llamar a la función de solicitud de contraseña al cargar la página
+requestPassword();
+
 // Escucha el evento "productList" y renderiza los productos en tiempo real
 socket.on("productList", (products) => {
   renderProducts(products); // Actualiza el DOM con los productos recibidos
