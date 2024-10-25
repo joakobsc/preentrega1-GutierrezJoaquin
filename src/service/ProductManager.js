@@ -7,6 +7,7 @@ export default class ProductManager {
     this.products = [];
     this.init();
   }
+
   async init() {
     try {
       const data = await fs.readFile(productosFilePath, "utf-8");
@@ -16,19 +17,28 @@ export default class ProductManager {
     }
   }
 
-  saveToFile() {
-    fs.writeFile(productosFilePath, JSON.stringify(this.products, null, 2));
-  }
-  getAllProducts(limit) {
-    if (limit) {
-      return this.products.slice(0, limit);
+  async saveToFile() {
+    try {
+      await fs.writeFile(
+        productosFilePath,
+        JSON.stringify(this.products, null, 2)
+      );
+    } catch (error) {
+      console.error("Error al guardar los productos:", error);
     }
-    return this.products;
   }
+
+  async getAllProducts(limit) {
+    // Refresca datos para asegurar que estén actualizados en cada solicitud
+    await this.init();
+    return limit ? this.products.slice(0, limit) : this.products;
+  }
+
   getProductById(id) {
     return this.products.find((product) => product.id === id);
   }
-  addProduct(product) {
+
+  async addProduct(product) {
     const newProduct = {
       id: this.products.length
         ? this.products[this.products.length - 1].id + 1
@@ -37,32 +47,35 @@ export default class ProductManager {
       status: true,
     };
     this.products.push(newProduct);
-    this.saveToFile();
+    await this.saveToFile();
     return newProduct;
   }
 
-  updateProduct(id, updatedFields) {
+  async updateProduct(id, updatedFields) {
     const productIndex = this.products.findIndex(
       (product) => product.id === id
     );
     if (productIndex === -1) return null;
+
     const updatedProduct = {
       ...this.products[productIndex],
       ...updatedFields,
       id: this.products[productIndex].id,
     };
+
     this.products[productIndex] = updatedProduct;
-    this.saveToFile();
+    await this.saveToFile();
     return updatedProduct;
   }
 
-  deleteProduct(id) {
+  async deleteProduct(id) {
     const productIndex = this.products.findIndex(
       (product) => product.id === id
     );
     if (productIndex === -1) return null;
-    const deletedProduct = this.products.splice(productIndex, 1);
-    this.saveToFile();
-    return deletedProduct[0];
+
+    const [deletedProduct] = this.products.splice(productIndex, 1);
+    await this.saveToFile();
+    return deletedProduct;
   }
 }
