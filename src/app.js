@@ -6,9 +6,24 @@ import handlebars from "express-handlebars";
 import viewRouter from "./routes/views.router.js"; // Asegúrate de que esté en minúsculas
 import { Server } from "socket.io";
 import ProductManager from "./service/ProductManager.js"; // Asegúrate de que ProductManager esté correctamente importado
+import mongoose from "mongoose";
 
 const app = express();
 const PORT = 8080;
+const DB =
+  "mongodb+srv://JoacoBSC:vODoUPdzpgxYFwsS@cluster0.pklyw.mongodb.net/e-commerce?retryWrites=true&w=majority&appName=Cluster0";
+
+const connectMongoDB = async () => {
+  try {
+    await mongoose.connect(DB);
+    console.log("Conectado a la base de datos");
+  } catch (error) {
+    console.error("Error al conectar a la base de datos:", error);
+    process.exit(1);
+  }
+};
+
+connectMongoDB();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
