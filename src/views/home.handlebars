@@ -1,11 +1,35 @@
 <h1 id="welcome-message"></h1>
 
 <h2>Lista de Productos</h2>
-<ul>
+<div class="products">
   {{#each products}}
-    <li>{{this.title}} - {{this.price}}</li>
+    <div class="product">
+      <h2>{{this.title}}</h2>
+      <p>{{this.description}}</p>
+      <p>Precio: ${{this.price}}</p>
+      <p>Categoría: {{this.category}}</p>
+
+      <!-- Botón de agregar al carrito -->
+      <form action="/api/carts/{{cartId}}/product/{{this._id}}" method="POST">
+        <button type="submit">Agregar al carrito</button>
+      </form>
+
+      <!-- Enlace a la página del producto con más detalles -->
+      <a href="/products/{{this._id}}">Ver detalles</a>
+    </div>
   {{/each}}
-</ul>
+</div>
+
+<!-- Paginación -->
+<div class="pagination">
+  {{#if (gt currentPage 1)}}
+    <a href="/products?page={{subtract currentPage 1}}">Anterior</a>
+  {{/if}}
+  <span>Página {{currentPage}} de {{totalPages}}</span>
+  {{#if (lt currentPage totalPages)}}
+    <a href="/products?page={{add currentPage 1}}">Siguiente</a>
+  {{/if}}
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {{! 1er: socket }}

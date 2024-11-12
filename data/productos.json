@@ -1,16 +1,5 @@
 [
   {
-    "id": 1,
-    "title": "RAM 1500",
-    "description": "Pickup robusta con motor V8 y tracción 4x4, ideal para trabajos pesados y aventuras.",
-    "code": "RAM15003",
-    "price": 55000,
-    "stock": 5,
-    "category": "Pick up",
-    "status": true
-  },
-
-  {
     "id": 2,
     "title": "Ford F-150",
     "description": "Pickup robusta con gran capacidad de carga y remolque, diseñada para tareas exigentes y aventuras al aire libre.",

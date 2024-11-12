@@ -3,9 +3,9 @@ import productsRouter from "./routes/products.router.js";
 import cartsRouter from "./routes/carts.routes.js";
 import __dirname from "./utils.js";
 import handlebars from "express-handlebars";
-import viewRouter from "./routes/views.router.js"; // Asegúrate de que esté en minúsculas
+import viewRouter from "./routes/views.router.js";
 import { Server } from "socket.io";
-import ProductManager from "./service/ProductManager.js"; // Asegúrate de que ProductManager esté correctamente importado
+import ProductManager from "./service/ProductManager.js";
 import mongoose from "mongoose";
 
 const app = express();
@@ -33,7 +33,23 @@ app.use(express.static(__dirname + "/public"));
 const productManager = new ProductManager();
 
 // Configuramos Handlebars como motor de plantillas
-app.engine("handlebars", handlebars.engine());
+app.engine(
+  "handlebars",
+  handlebars.engine({
+    defaultLayout: "main",
+    helpers: {
+      gt: (a, b) => a > b, // Define el helper `gt`
+      lt: (a, b) => a < b, // Define el helper `lt`
+      add: (a, b) => a + b, // Define el helper `add`
+      subtract: (a, b) => a - b, // Define el helper `subtract`
+    },
+    allowProtoPropertiesByDefault: true,
+    runtimeOptions: {
+      allowProtoPropertiesByDefault: true,
+      allowProtoMethodsByDefault: true,
+    },
+  })
+);
 app.set("views", __dirname + "/views");
 app.set("view engine", "handlebars");
 
