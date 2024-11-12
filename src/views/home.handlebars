@@ -1,6 +1,10 @@
 <h1 id="welcome-message"></h1>
 
 <h2>Lista de Productos</h2>
+
+<p>CART ID: {{cart._id}}</p>
+<!-- Esto se mostrará en la página -->
+
 <div class="products">
   {{#each products}}
     <div class="product">
@@ -10,7 +14,7 @@
       <p>Categoría: {{this.category}}</p>
 
       <!-- Botón de agregar al carrito -->
-      <form action="/api/carts/{{cartId}}/product/{{this._id}}" method="POST">
+      <form action="/api/carts/{{cart._id}}/product/{{this._id}}" method="POST">
         <button type="submit">Agregar al carrito</button>
       </form>
 
