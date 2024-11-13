@@ -15,6 +15,8 @@
   {{#each products}}
     <div class="product">
       <h2>{{this.title}}</h2>
+      <img src="{{this.thumbnail}}" alt="{{this.title}}">
+      <p>Descripción: 
       <p>{{this.description}}</p>
       <p>Precio: ${{this.price}}</p>
       <p>Categoría: {{this.category}}</p>

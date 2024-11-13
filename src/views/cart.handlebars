@@ -4,6 +4,8 @@
     {{#each cart.products}}
       <li>
         <h3>{{this.productId.title}}</h3>
+        <img src="{{this.productId.thumbnail}}" alt="{{this.productId.title}}" />
+        <p>Precio Unitario: ${{this.productId.price}}</
         <p>Cantidad: {{this.quantity}}</p>
         <p>Precio: ${{this.productId.price}}</p>
       </li>

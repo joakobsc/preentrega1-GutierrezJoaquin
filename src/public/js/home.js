@@ -2,29 +2,63 @@
 const socket = io();
 let user;
 
-// Solicitar el nombre de usuario al cargar la página
-Swal.fire({
-  icon: "info",
-  title: "Bienvenido!",
-  text: "Ingrese su nombre para identificarse.",
-  input: "text",
-  inputPlaceholder: "Nombre de usuario",
-  allowOutsideClick: false,
-  inputValidator: (value) => {
-    if (!value) {
-      return "Por favor, ingrese un nombre de usuario.";
-    } else {
-      user = value; // Guardar el nombre del usuario
-      socket.emit("userConnected", { user }); // Emitir evento al servidor
-      return null; // No hay error
+// Verificar si ya existe un nombre de usuario en la sesión
+fetch("/get-session-user", { method: "GET" })
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Error al obtener el usuario desde la sesión");
     }
-  },
-}).then(() => {
-  // Mostrar mensaje de bienvenida en el DOM
-  const welcomeMessage = document.getElementById("welcome-message");
-  welcomeMessage.innerHTML = `<h2>¡Bienvenido, ${user}!</h2>`;
+    return response.json();
+  })
+  .then((data) => {
+    if (data.user) {
+      user = data.user; // Si el usuario ya está en la sesión, lo usamos
+      // Mostrar mensaje de bienvenida en el DOM
+      const welcomeMessage = document.getElementById("welcome-message");
+      welcomeMessage.innerHTML = `<h2>¡Bienvenido, ${user}!</h2>`;
+    } else {
+      // Solicitar el nombre de usuario al cargar la página
+      Swal.fire({
+        icon: "info",
+        title: "Bienvenido!",
+        text: "Ingrese su nombre para identificarse.",
+        input: "text",
+        inputPlaceholder: "Nombre de usuario",
+        allowOutsideClick: false,
+        inputValidator: (value) => {
+          if (!value) {
+            return "Por favor, ingrese un nombre de usuario.";
+          } else {
+            user = value; // Guardar el nombre del usuario
+            socket.emit("userConnected", { user }); // Emitir evento al servidor
 
-  // Capturar el evento de clic en el botón "Agregar al carrito"
+            // Guardar el nombre de usuario en la sesión
+            fetch("/set-session-user", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ user }),
+            }).then((response) => {
+              if (!response.ok) {
+                throw new Error("Error al guardar el usuario en la sesión");
+              }
+            });
+
+            return null;
+          }
+        },
+      }).then(() => {
+        // Mostrar mensaje de bienvenida en el DOM
+        const welcomeMessage = document.getElementById("welcome-message");
+        welcomeMessage.innerHTML = `<h2>¡Bienvenido, ${user}!</h2>`;
+      });
+    }
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+  });
+
+// Capturar el evento de clic en el botón "Agregar al carrito"
+document.addEventListener("DOMContentLoaded", () => {
   const addToCartButtons = document.querySelectorAll(".add-to-cart");
 
   addToCartButtons.forEach((button) => {

@@ -8,6 +8,7 @@ import { Server } from "socket.io";
 import ProductManager from "./service/ProductManager.js";
 import mongoose from "mongoose";
 import { cartModel } from "./models/cart.model.js";
+import session from "express-session";
 
 const app = express();
 const PORT = 8080;
@@ -25,6 +26,17 @@ const connectMongoDB = async () => {
 };
 
 connectMongoDB();
+
+// Inicializa la sesión
+
+app.use(
+  session({
+    secret: "admin123",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false },
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -58,6 +70,22 @@ app.set("view engine", "handlebars");
 app.use("/", viewRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/cart", cartsRouter);
+
+//usuarios
+
+app.get("/get-session-user", (req, res) => {
+  const user = req.session.user;
+  res.json({ user });
+});
+
+app.post("/set-session-user", express.json(), (req, res) => {
+  const { user } = req.body;
+  if (!user || user.trim() === "") {
+    return res.status(400).send("Usuario necesario");
+  }
+  req.session.user = user;
+  res.status(200).send("Usuario guardado en sesión");
+});
 
 // Iniciar el servidor HTTP
 const httpServer = app.listen(PORT, () => {

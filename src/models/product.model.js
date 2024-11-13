@@ -33,10 +33,9 @@ const productsSchema = new mongoose.Schema({
     required: true,
   },
 
-  /*   image: {
+  thumbnail: {
     type: String,
-    default: "https://via.placeholder.com/150x150",
-  }, */
+  },
 });
 
 export const productsModel = mongoose.model(productsCollection, productsSchema);

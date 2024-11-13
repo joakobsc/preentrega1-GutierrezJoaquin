@@ -17,20 +17,34 @@ const productManager = new ProductManager();
 
 router.get("/products", async (req, res) => {
   try {
+    // Verifica si ya existe un carrito en la sesión
+    let cartId = req.session.cartId;
+
+    // Si no hay un carrito en la sesión, crea uno nuevo
+
+    if (!cartId) {
+      const newCart = new cartModel({ products: [] });
+      // Asignamos el ID del carrito a la sesión
+      await newCart.save();
+      // Asignamos el ID del carrito a la sesión
+      cartId = newCart._id.toString();
+      // Guardamos el ID del carrito en la sesión
+      req.session.cartId = cartId;
+    }
+
     // Crea un nuevo carrito vacío y guárdalo en la base de datos
     const newCart = new cartModel({ products: [] });
-    await newCart.save(); // Guardamos el carrito en la base de datos
+    await newCart.save();
 
     // Extraemos la página actual y la cantidad de productos por página
     const page = parseInt(req.query.page) || 1;
-    const limit = 5; // Número de productos por página
+    const limit = 2;
     const skip = (page - 1) * limit;
 
     // Obtener productos con paginación
     const products = await productsModel.find().skip(skip).limit(limit);
     const totalProducts = await productsModel.countDocuments();
     const totalPages = Math.ceil(totalProducts / limit);
-    const cartId = newCart._id.toString();
 
     // Agregar cartId a cada producto
     const productsWithCartId = products.map((product) => ({
@@ -40,8 +54,8 @@ router.get("/products", async (req, res) => {
 
     // Renderizar la vista 'home' con los productos, carrito y paginación
     res.render("home", {
-      products: productsWithCartId, // Ahora cada producto tiene cartId
-      cartId, // También puedes pasarlo aquí si necesitas usarlo fuera del each
+      products: productsWithCartId,
+      cartId,
       currentPage: page,
       totalPages,
       style: "index.css",
