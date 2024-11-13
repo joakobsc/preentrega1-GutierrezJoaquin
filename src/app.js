@@ -7,6 +7,7 @@ import viewRouter from "./routes/views.router.js";
 import { Server } from "socket.io";
 import ProductManager from "./service/ProductManager.js";
 import mongoose from "mongoose";
+import { cartModel } from "./models/cart.model.js";
 
 const app = express();
 const PORT = 8080;
@@ -66,8 +67,15 @@ const httpServer = app.listen(PORT, () => {
 // Nueva instancia de Socket.io
 const socketServer = new Server(httpServer);
 
+/*================================================================
+
+A CONTINUACIÓN SE COMENTA LOS EVENTOS MANEJADOS CON productManager
+ que trabajaba con data del archivo JSON
+
+================================================================*/
+
 // Se implementa todo lo relacionado con sockets
-socketServer.on("connection", async (socket) => {
+/* socketServer.on("connection", async (socket) => {
   console.log("Nuevo cliente conectado");
 
   socket.on("userConnected", ({ user }) => {
@@ -87,5 +95,54 @@ socketServer.on("connection", async (socket) => {
   socket.on("deleteProduct", async (productId) => {
     await productManager.deleteProduct(productId);
     socketServer.emit("productList", await productManager.getAllProducts()); // Actualizar para todos los clientes
+  });
+}); */
+
+/* =============================================================================
+              AHORA:
+Utilizamos socket para poder comunicarnos con el cliente 
+desde el servidor, sin necesidad de hacer solicitudes HTTP convencionales
+y hacer un procesamiento en tiempo real
+
+===========================================================================*/
+
+socketServer.on("connection", async (socket) => {
+  console.log("Nuevo cliente conectado");
+
+  socket.on("userConnected", ({ user }) => {
+    console.log(`${user} se ha conectado`);
+  });
+  // Escuchar el evento 'addToCart'
+  socket.on("addToCart", async ({ productId, cartId }) => {
+    try {
+      // Buscar el carrito en la base de datos
+      const cart = await cartModel.findById(cartId);
+      if (cart) {
+        // Verifica si el producto ya está en el carrito
+        const productIndex = cart.products.findIndex(
+          (product) => product.productId.toString() === productId
+        );
+
+        if (productIndex === -1) {
+          // Agregar el producto al carrito si no existe
+          cart.products.push({ productId, quantity: 1 });
+        } else {
+          // Incrementa la cantidad si ya existe
+          cart.products[productIndex].quantity += 1;
+        }
+
+        await cart.save();
+
+        // Emitir mensaje de éxito al cliente
+        socket.emit("cartUpdated", {
+          message: "Producto agregado exitosamente",
+        });
+      } else {
+        throw new Error("Carrito no encontrado");
+      }
+    } catch (error) {
+      console.error("Error al agregar al carrito:", error);
+      socket.emit("error", { message: "No se pudo agregar al carrito" });
+    }
   });
 });
